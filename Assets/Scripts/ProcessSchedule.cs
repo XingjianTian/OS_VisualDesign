@@ -10,9 +10,9 @@ public enum AlgorithmState {
     RR,
     PF,
 }
-
 public class ProcessSchedule : MonoBehaviour {
 
+    public bool ifsorted = false;
     //控制输入
     public bool ifReadyToCreate = false;
     public bool ifcreated = false;
@@ -31,34 +31,23 @@ public class ProcessSchedule : MonoBehaviour {
     public GameObject ProcessInfo;//所有进程信息
     public string Process_Information;//进程信息的字符化
 
-	// Use this for initialization
 	void Start () {
         
     }
-	
-	// Update is called once per frame
 	void Update () {
         //获取输入
         if (ifReadyToCreate && ifcreated == false)
         {
             ProcessNum = System.Convert.ToInt32(Input_Field.text);
             TimeSlice = System.Convert.ToDouble(Input_Field2.text);
-
             CreateProcessList();
             Input_Field.readOnly = true;
             Input_Field2.readOnly = true;
-
-
             ProcessInfo.GetComponent<Text>().text = CreateProcessInformation();
             Time.timeScale = 0;
         }
-
-        //调度算法演示
         ChooseAndDoAlgorithm();
-     
     }
-   
-
     public void CreateProcessList()
     {
         
@@ -67,6 +56,7 @@ public class ProcessSchedule : MonoBehaviour {
             Vector2 p = Random.insideUnitCircle * 1.5f;
             Vector3 pos = new Vector3(p.x,p.y,0)+new Vector3(-6,(float)-2.595,0);
             newprocess = Instantiate(Process_Prefabs, pos, Quaternion.identity);
+            
             newprocess.SetActive(false);
             newprocess.GetComponent<TextMesh>().text = System.Convert.ToString(i+1);
 
@@ -111,56 +101,60 @@ public class ProcessSchedule : MonoBehaviour {
     {
         if (Process_List.Count != 0)
         {
-            switch (PAS)
+            if (!ifsorted)
             {
-                case AlgorithmState.FCFS:
-                    Process_List.Sort((x, y) =>
-                    {
-                        if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
-                            return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
-                        else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
-                            return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
-                        else
+                switch (PAS)
+                {
+                    case AlgorithmState.FCFS:
+                        Process_List.Sort((x, y) =>
                         {
-                            return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
-                        }
-                    }); break;//按到达时间排序
-                case AlgorithmState.PF:
-                    Process_List.Sort((x, y) =>
-                    {
-                        if (x.GetComponent<Process>().Priority != y.GetComponent<Process>().Priority)
-                            return x.GetComponent<Process>().Priority.CompareTo(y.GetComponent<Process>().Priority);
-                        else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
-                            return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
-                        else
-                            return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
-                    }); break;//按优先级排序
-                case AlgorithmState.SJF:
-                    Process_List.Sort((x, y) =>
-                    {
-                        if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
-                            return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
-                        else if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
-                            return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
-                        else
-                        {
-                            return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
-                        }
-                    }); break;//按所需时间排序
-                case AlgorithmState.RR:
-                    Process_List.Sort((x, y) =>
-                    {
-                        if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
-                            return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
-                        else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
-                            return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
-                        else
-                        {
-                            return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
-                        }
-                    }); break;//到达排序
-            }
 
+                            if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
+                                return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
+                            else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
+                                return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
+                            else
+                            {
+                                return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
+                            }
+                        }); break;//按到达时间排序
+                    case AlgorithmState.PF:
+                        Process_List.Sort((x, y) =>
+                        {
+                            if (x.GetComponent<Process>().Priority != y.GetComponent<Process>().Priority)
+                                return x.GetComponent<Process>().Priority.CompareTo(y.GetComponent<Process>().Priority);
+                            else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
+                                return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
+                            else
+                                return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
+                        }); break;//按优先级排序
+                    case AlgorithmState.SJF:
+                        Process_List.Sort((x, y) =>
+                        {
+                            if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
+                                return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
+                            else if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
+                                return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
+                            else
+                            {
+                                return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
+                            }
+                        }); break;//按所需时间排序
+                    case AlgorithmState.RR:
+                        Process_List.Sort((x, y) =>
+                        {
+                            if (x.GetComponent<Process>().ArrivalTime != y.GetComponent<Process>().ArrivalTime)
+                                return x.GetComponent<Process>().ArrivalTime.CompareTo(y.GetComponent<Process>().ArrivalTime);
+                            else if (x.GetComponent<Process>().NeedTime != y.GetComponent<Process>().NeedTime)
+                                return x.GetComponent<Process>().NeedTime.CompareTo(y.GetComponent<Process>().NeedTime);
+                            else
+                            {
+                                return x.GetComponent<Process>().ProcessID.CompareTo(y.GetComponent<Process>().ProcessID);
+                            }
+                        }); break;//到达排序
+                }
+                ifsorted = true;
+            }
             foreach (var process in Process_List)
                 process.GetComponent<Process>().MoveFromCreateToReady();
 
@@ -168,7 +162,9 @@ public class ProcessSchedule : MonoBehaviour {
             {
                 Process_List[i].GetComponent<Process>().ProcessPos = i;
 
-                if (i == 0)
+                if (i == 0||
+                    ( Process_List[i].GetComponent<Process>().PS == ProcessState.Running&&
+                    Process_List[i].GetComponent<Process>().MoveFromTo == ProcessMoveFrom_To.ReadyToRunning))
                     Process_List[i].GetComponent<Process>().action();
                 else if (
                 (Process_List[i - 1].GetComponent<Process>().PS != Process_List[i].GetComponent<Process>().PS &&
@@ -185,7 +181,6 @@ public class ProcessSchedule : MonoBehaviour {
             }
         }
     }
-
 }
 
 

@@ -33,8 +33,9 @@ public enum ProcessMoveFrom_To
 
 public class Process : MonoBehaviour
 {
+    bool oncechange = true;
     public Texture2D img;
-    public bool isShowUp = false;
+    public bool isShowUp = false;//动态显示状态
     public double time = 0;//时间变量，实现每timeslice秒NeedTime-,CPUTime+
     public bool startloop = true;
 
@@ -72,10 +73,10 @@ public class Process : MonoBehaviour
     {
 
     }
-
-    //运动函数
     public void action()
     {
+   
+
         int WaitToRunProcessNum = ps.GetComponent<ProcessSchedule>().ProcessNum;
         for (int i = 0; i < ps.GetComponent<ProcessSchedule>().ProcessNum; i++)
         {
@@ -110,8 +111,18 @@ public class Process : MonoBehaviour
                                     IORequest = true;
                                 }
                                 else if (ps.GetComponent<ProcessSchedule>().PAS
-                                    == AlgorithmState.RR)
+                                    == AlgorithmState.RR&&oncechange)
+                                {
                                     MoveFromRunningToReady();
+                                    GameObject tempProcess = ps.GetComponent<ProcessSchedule>().Process_List[ProcessPos];
+                                    
+                                    int numcount = ps.GetComponent<ProcessSchedule>().Process_List.Count;
+                                    //tempProcess.GetComponent<Process>().ProcessPos = numcount-1;
+                                    // ps.GetComponent<ProcessSchedule>().Process_List[numcount-1] = tempProcess;
+                                    ps.GetComponent<ProcessSchedule>().Process_List.Insert(numcount, tempProcess);
+                                    ps.GetComponent<ProcessSchedule>().Process_List.RemoveAt(ProcessPos);
+                                    oncechange = false;
+                                }
                             }
                             time = 0;
                         }
@@ -158,9 +169,7 @@ public class Process : MonoBehaviour
                 }
             }
         }
-    }
-
-    //每秒参数变化
+    } //运动函数
     public void Change(double time)
     {
         if (NeedTime > 0)
@@ -170,20 +179,7 @@ public class Process : MonoBehaviour
             GetComponent<TextMesh>().color =
                 GetComponent<TextMesh>().color == Color.white ? Color.green : Color.white;
         }
-    }
-
-    /*
-    public IEnumerator ParameterChangePerSecond()
-    {
-        yield return new WaitForSeconds(5);
-        if (NeedTime > 0)
-        {
-            NeedTime--;
-            CPUTime++;
-        }
-         
-    }*/
-
+    }//每秒参数变化
     //移动函数公用
     public void settingRandomFinalPos()
     {
@@ -208,7 +204,7 @@ public class Process : MonoBehaviour
         Vector3 Begin = transform.position;
         IfMoveOver = false;
         //IfNewFinal = false;
-    }
+    }//设置最后到达的随机点
     public void MoveOver()
     {
         if (transform.position.x >= FinalPosition.x - 0.05 && transform.position.x <= FinalPosition.x + 0.05
@@ -228,7 +224,7 @@ public class Process : MonoBehaviour
             MoveTo = ProcessMoveTo.ToEntrance;
             //FunctionsCount++;
         }
-    }
+    }//判断运动是否结束
     public void MoveNavigation()
     {
         double Precision = 0.025;
@@ -297,8 +293,7 @@ public class Process : MonoBehaviour
 
         }
 
-    }
-
+    }//保证过桥运动
     public bool CanAct()
     {
         if (PS == ProcessState.Ready)//&&!startloop)
@@ -323,8 +318,7 @@ public class Process : MonoBehaviour
             }
         }
         return true;
-    }
-
+    }//判断是否能运动
     public void MoveFromCreateToReady()
     {
         if (PS == ProcessState.Create && (MoveFromTo == ProcessMoveFrom_To.JustStay ||
@@ -345,8 +339,7 @@ public class Process : MonoBehaviour
         }
 
 
-    }
-    //从就绪状态移动到运行状态
+    }//从就绪状态移动到运行状态
     public void MoveFromReadyToRunning()
     {
 
@@ -368,8 +361,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }
-    //从运行状态移动到就绪状态
+    }//从运行状态移动到就绪状态
     public void MoveFromRunningToReady()
     {
 
@@ -390,8 +382,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }
-    //从运行状态移动到到阻塞状态
+    }//从运行状态移动到到阻塞状态
     public void MoveFromRunningToBloked()
     {
 
@@ -412,8 +403,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }
-    //从运行状态到结束区域
+    }//从运行状态到结束区域
     public void MoveFromRunningToEnded()
     {
 
@@ -434,8 +424,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }
-    //从阻塞状态到就绪状态
+    }//从阻塞状态到就绪状态
     public void MoveFromBlokedToReady()
     {
         if (PS == ProcessState.Blocked && (MoveFromTo == ProcessMoveFrom_To.JustStay ||
@@ -456,8 +445,6 @@ public class Process : MonoBehaviour
         }
 
     }
-
-
     //实时显示
     void OnMouseEnter(){isShowUp = true;}
     void OnMouseExit(){isShowUp = false;}
