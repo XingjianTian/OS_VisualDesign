@@ -76,14 +76,14 @@ public class Process : MonoBehaviour
     public void action()
     {
    
-
+        /*
         int WaitToRunProcessNum = ps.GetComponent<ProcessSchedule>().ProcessNum;
         for (int i = 0; i < ps.GetComponent<ProcessSchedule>().ProcessNum; i++)
         {
             if (ps.GetComponent<ProcessSchedule>().Process_List[i].
                 GetComponent<Process>().PS == ProcessState.Ended)
                 WaitToRunProcessNum--;
-        }
+        }*/
 
         if (CanAct())
         {
@@ -101,9 +101,9 @@ public class Process : MonoBehaviour
                         //用时间变量实现重复调用
                         {
                             Change(ps.GetComponent<ProcessSchedule>().TimeSlice);
-                            if (NeedTime > 0 && WaitToRunProcessNum > 1)
+                            if (NeedTime > 0 && ps.GetComponent<ProcessSchedule>().Process_List.Count > 0)
                             {
-                                randomnum = Random.Range(1, 5);
+                                randomnum = Random.Range(1, 8);
                                 //改变movefromto值
                                 if (randomnum == 4)
                                 {
@@ -339,7 +339,7 @@ public class Process : MonoBehaviour
         }
 
 
-    }//从就绪状态移动到运行状态
+    }//从创建状态移动到就绪状态
     public void MoveFromReadyToRunning()
     {
 
@@ -361,7 +361,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }//从运行状态移动到就绪状态
+    }//从就绪状态移动到运行状态
     public void MoveFromRunningToReady()
     {
 
@@ -382,7 +382,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }//从运行状态移动到到阻塞状态
+    }//从运行状态移动到就绪状态
     public void MoveFromRunningToBloked()
     {
 
@@ -403,7 +403,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }//从运行状态到结束区域
+    }//从运行状态移动到到阻塞状态
     public void MoveFromRunningToEnded()
     {
 
@@ -421,10 +421,12 @@ public class Process : MonoBehaviour
             {
                 MoveNavigation();
                 MoveOver();
+                if(IfMoveOver==true)
+                     ps.GetComponent<ProcessSchedule>().Process_List.RemoveAt(ProcessPos);
             }
         }
 
-    }//从阻塞状态到就绪状态
+    }//从运行状态到结束区域
     public void MoveFromBlokedToReady()
     {
         if (PS == ProcessState.Blocked && (MoveFromTo == ProcessMoveFrom_To.JustStay ||
@@ -444,7 +446,7 @@ public class Process : MonoBehaviour
             }
         }
 
-    }
+    }//从阻塞状态到就绪状态
     //实时显示
     void OnMouseEnter(){isShowUp = true;}
     void OnMouseExit(){isShowUp = false;}
